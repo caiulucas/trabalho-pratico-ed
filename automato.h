@@ -9,7 +9,7 @@ int **allocateReticulated(int dimension);
 
 void deallocateReticulated(CelularAutomaton *automaton);
 
-void readReticulated(char *filename, CelularAutomaton *automaton);
+void readReticulated(CelularAutomaton *automaton);
 
 CelularAutomaton evolveReticulated(CelularAutomaton automaton);
 

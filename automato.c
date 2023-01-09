@@ -79,17 +79,9 @@ void deallocateReticulated(CelularAutomaton *automaton) // Função para desaloc
   free(automaton->reticulated);
 }
 
-void readReticulated(char *filename, CelularAutomaton *automaton) // Função para ler o arquivo
+void readReticulated(CelularAutomaton *automaton) // Função para ler o arquivo
 {
-  FILE *file = fopen(filename, "r");
-
-  if (file == NULL)
-  {
-    printf("\nArquivo não pode ser aberto.\n");
-    exit(1);
-  }
-
-  fscanf(file, "%d", &automaton->dimension);
+  fscanf(stdin, "%d", &automaton->dimension);
 
   // Aloca a matrix de acordo com a dimensão lida na primeira linha do arquivo
   automaton->reticulated = allocateReticulated(automaton->dimension);
@@ -99,10 +91,9 @@ void readReticulated(char *filename, CelularAutomaton *automaton) // Função pa
   {
     for (int j = 0; j < automaton->dimension; j++)
     {
-      fscanf(file, "%d", &automaton->reticulated[i][j]);
+      fscanf(stdin, "%d", &automaton->reticulated[i][j]);
     }
   }
-  fclose(file);
 }
 
 CelularAutomaton evolveReticulated(CelularAutomaton automaton) // Função para evoluir as células
