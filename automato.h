@@ -5,8 +5,6 @@ typedef struct {
   int **reticulated;
 } CelularAutomaton;
 
-int **allocateReticulated(int dimension);
-
 void deallocateReticulated(CelularAutomaton *automaton);
 
 void readReticulated(CelularAutomaton *automaton);
