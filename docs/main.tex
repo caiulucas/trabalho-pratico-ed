@@ -1,0 +1,461 @@
+\documentclass{article}
+
+\input{setup}
+
+\begin{document}
+
+\CAPA{Trabalho Prático I}{BCC202 - Estrutura de Dados I}{Caio Lucas Pereira da Silva, Vinicius Nunes dos Anjos, Lucca Sales de Souza Teodoro}{Pedro Henrique Lopes Silva}
+
+
+\section{Introdução}
+\DESCRICAO{}
+Para este trabalho é necessário entregar o código em C e um relatório referente ao que foi desenvolvido. O algoritmo a ser desenvolvido é o autômato celular Jogo da Vida (Conway's Game of Life), criado pelo matemático britânico John Horton Conway em 1970.  Ele é baseado em regras simples que determinam como células vivas ou mortas interagem em um grid quadrado. Embora o jogo seja simples, as configurações resultantes podem ser surpreendentemente complexas e imprevisíveis.
+
+O jogo da vida é muitas vezes usado como um exemplo de autômato celular, um sistema computacional que consiste em uma grade de células que podem estar em diferentes estados. Ele também é estudado como uma forma de simular sistemas biológicos e sociais, e foi usado como uma ferramenta para a ciência da computação e inteligência artificial.
+
+A codificação deve ser feita em C, usando somente a biblioteca padrão da GNU, sem o uso de bibliotecas adicionais. Além disso, deve-se usar um dos padrões: ANSI C 89 ou ANSI C 99.
+
+\subsection{Especificações do problema}
+
+\DESCRICAO{}
+É necessário processar adequadamente um arquivo de entrada que contém a dimensão de uma matriz na sua primeira linha e os valores correspondentes nas linhas seguintes. Esses valores representam o estado inicial do jogo da vida. Com base nesses valores de entrada, é necessário gerar uma saída que apresente o próximo estado do jogo, levando em consideração as regras estabelecidas para a simulação.
+
+\subsection{Ferramentas utilizadas}
+Algumas ferramentas foram utilizadas durante a criação deste projeto:
+
+\begin{itemize}
+  \item Ambiente de desenvolvimento do código fonte: Visual Studio Code. \footnote{VScode está disponível em \url{https://code.visualstudio.com/}}
+  \item Linguagem utilizada: C.
+  \item Ambiente de desenvolvimento da documentação: Overleaf \LaTeX. \footnote{Disponível em \url{https://www.overleaf.com/}}
+\end{itemize}
+
+\subsection{Ferramentas adicionais}
+Algumas ferramentas foram utilizadas para auxiliar no desenvolvimento, como:
+\begin{itemize}
+    \item[-] \textit{Live Share}: ferramenta usada para \textit{pair programming} à distância.
+    \item[-] \textit{Valgrind}: ferramentas de análise dinâmica do código.
+\end{itemize}
+
+\subsection{Especificações da máquina}
+A máquina onde o desenvolvimento e os testes foram realizados possui a seguinte configuração:
+\begin{itemize}
+    \item[-] Processador: AMD Ryzen 5-5500U.
+    \item[-] Memória RAM: 8GB.
+    \item[-] Sistema Operacional: Linux Pop\_OS.
+\end{itemize}
+
+\subsection{Instruções de compilação e execução}
+
+Para a compilação do projeto, basta digitar o seguinte comando para rodar o arquivo \textit{Makefile} disponível:
+
+\begin{tcolorbox}[title=Compilando o projeto,width=\linewidth]
+    make
+\end{tcolorbox}
+
+Usou-se para a compilação as seguintes opções:
+\begin{itemize}
+    \item [-] \emph{-o}: para definir o arquivo de saída.
+    \item [-] \emph{-g}: para compilar com informação de depuração e ser usado pelo Valgrind.
+    \item [-] \emph{-Wall}: para mostrar todos os possível \emph{warnings} do código.
+    \item [-] \emph{-c}: para compilação do código e geração dos arquivos objetos.
+\end{itemize}
+
+Para a execução do programa basta digitar :
+\begin{tcolorbox}[title=,width=\linewidth]
+    ./exe \textless{}  arquivo.in
+\end{tcolorbox}
+
+Onde o arquivo de entrada contém o tamanho da matriz e seus valores.
+
+\clearpage
+\section{Desenvolvimento}
+\DESCRICAO{}
+O desenvolvimento foi realizado utilizando da técnica de pair programming, onde todos os integrantes do grupo programaram e participaram ativamente do código ao mesmo tempo. O uso das ferramentas Live Share para o compartilhamento de código e do Discord para a comunicação em equipe foi o que viabilizou o uso da técnica citada.
+
+\subsection{Codificação do autômato}
+\DESCRICAO{} 
+Para a codificação do autômato foram criados dois arquivos: automato.h, responsável por guardar a prototipagem usada nas funções e automato.c, contendo a implementação das funções em si.
+\hfill\break
+
+\noindent Começando pelo automato.h, temos o seguinte código:
+
+\begin{lstlisting}[caption={Headers do autômato.},label={lst:cod1},language=C]
+#pragma once
+
+typedef struct {
+  int dimension;
+  int **reticulated;
+} CelularAutomaton;
+
+void deallocateReticulated(CelularAutomaton *automaton);
+
+void readReticulated(CelularAutomaton *automaton);
+
+CelularAutomaton evolveReticulated(CelularAutomaton automaton);
+
+void printReticulated(CelularAutomaton automaton);
+ \end{lstlisting}
+ 
+ \begin{itemize}
+\item Linha \textbf{\#pragma once} é um diretiva de pré-processador que garante que o arquivo só será incluído uma única vez no programa. Isso é útil para evitar problemas de inclusão múltipla.
+\item A estrutura \textbf{CelularAutomaton} armazena a dimensão da matriz reticulada e um ponteiro para a matriz. A matriz é representada como uma matriz de inteiros, onde cada célula pode ser 0 (morta) ou 1 (viva). Esta estrutura vai facilitar o manuseio dos dados.
+\item A função \textbf{deallocateReticulated(CelularAutomaton *automaton)}libera a memória alocada para a matriz reticulada. Esse passo é importante para evitar vazamentos de memória e problemas de performance.
+\item A função \textbf{readReticulated(CelularAutomaton *automaton)} lê os valores da matriz a partir de um arquivo de entrada e armazena-os na estrutura automaton. Dessa forma, é possível carregar estados previamente salvos do jogo.
+\item A função \textbf{evolveReticulated(CelularAutomaton automaton)} aplica as regras do jogo da vida na matriz fornecida e retorna uma estrutura CelularAutomaton com o estado evoluído. Essa é a parte importante da implementação onde ocorre o evoluir das celulas de acordo com as regras do jogo.
+\item A função \textbf{printReticulated(CelularAutomaton automaton)} imprime os valores da matriz reticulada em formato legível para o usuário. Isso permite que o usuário veja visualmente a evolução do jogo.
+ \end{itemize}
+ 
+No arquivo automato.c temos a implementação das funções acima. Vale destacar as funções \textbf{countLiveNeighbors}, que não está na listagem por ser exclusiva do arquivo automato.c, e a \textbf{evolveReticulated}, que é a responsável pela principal finalidade do projeto. Outra função não listada, mas de menor importância é a \textbf{allocateReticulated}, responsável pela alocação dinâmica das matrizes.
+ 
+\hfill\break
+
+\noindent A seguir, o código da função \textbf{countLiveNeighbors}:
+ 
+ \begin{lstlisting}[caption={Função countLiveNeighbors.},label={lst:cod2},language=C]
+// Funcao para verificar as celulas vivas vizinhas
+int countLiveNeighbors(CelularAutomaton automaton, int row, int col)
+{
+int count = 0;
+// Checa as principais direções
+if (col > 0 && automaton.reticulated[row][col - 1] == 1)
+{
+count++;
+}
+
+if (col < automaton.dimension - 1 && automaton.reticulated[row][col + 1] == 1)
+{
+count++;
+}
+
+if (row > 0 && automaton.reticulated[row - 1][col] == 1)
+{
+count++;
+}
+
+if (row < automaton.dimension - 1 && automaton.reticulated[row + 1][col] == 1)
+{
+count++;
+}
+
+// Checa as diagonais
+if (row > 0 && col > 0 && automaton.reticulated[row - 1][col - 1] == 1)
+{
+count++;
+}
+
+if (row > 0 && col < automaton.dimension - 1 && automaton.reticulated[row - 1][col + 1] == 1)
+{
+count++;
+}
+
+if (row < automaton.dimension - 1 && col > 0 && automaton.reticulated[row + 1][col - 1] == 1)
+{
+count++;
+}
+
+if (row < automaton.dimension - 1 && col < automaton.dimension - 1 && automaton.reticulated[row + 1][col + 1] == 1)
+{
+count++;
+}
+
+return count;
+}
+ \end{lstlisting}
+ 
+ A função acima é uma função para contar o número de células vizinhas vivas a uma dada célula em uma matriz reticulada, que é representada pela estrutura \textbf{CelularAutomaton}. A função recebe como parâmetros a estrutura automaton, uma linha (\textit{row}) e uma coluna (\textit{col}) da matriz reticulada, que representam a posição da célula para a qual se deseja contar as células vizinhas vivas.
+
+A função começa inicializando uma variável \textit{count} com zero, que será usada para armazenar o número de células vizinhas vivas. Em seguida, a função verifica se as células nas posições imediatamente à esquerda, à direita, acima, abaixo, e nas diagonais da célula dada estão vivas. Isso é feito usando as condições de verificação nos \textit{if statement}, que verificam se a posição está dentro dos limites da matriz e se o valor da célula na posição é igual a 1. Se a célula estiver viva, a variável \textit{count} é incrementada.
+
+No final da função, o número de células vizinhas vivas é retornado como o valor de retorno. Com essa função, é possível contar quantas células vivas estão no entorno de uma dada célula, o que é uma das regras para o jogo da vida.
+
+\hfill\break
+\hfill\break
+A seguir está a função \textbf{evolveReticulated}:
+ \begin{lstlisting}[caption={Função countLiveNeighbors.},label={lst:cod3},language=C]
+ // Funcao para evoluir as celulas
+CelularAutomaton evolveReticulated(CelularAutomaton automaton) 
+{
+  int nextGen[automaton.dimension][automaton.dimension];
+  for (int i = 0; i < automaton.dimension; i++)
+  {
+    for (int j = 0; j < automaton.dimension; j++)
+    {
+      int liveNeighborsCount = countLiveNeighbors(automaton, i, j);
+
+      // Validacao das regras de vivo ou morto de acordo com o numero de vizinhos
+      if (automaton.reticulated[i][j] == 1)
+      {
+        if (liveNeighborsCount < 2 || liveNeighborsCount > 3)
+        {
+          nextGen[i][j] = 0;
+        }
+        else
+        {
+          nextGen[i][j] = 1;
+        }
+      }
+
+      else
+      {
+        if (liveNeighborsCount == 3)
+        {
+          nextGen[i][j] = 1;
+        }
+        else
+        {
+          nextGen[i][j] = 0;
+        }
+      }
+    }
+  }
+
+  CelularAutomaton nextGenAutomaton;
+  nextGenAutomaton.dimension = automaton.dimension;
+  nextGenAutomaton.reticulated = allocateReticulated(nextGenAutomaton.dimension);
+
+  for (int i = 0; i < nextGenAutomaton.dimension; i++)
+  {
+    for (int j = 0; j < nextGenAutomaton.dimension; j++)
+    {
+      nextGenAutomaton.reticulated[i][j] = nextGen[i][j];
+    }
+  }
+
+  return nextGenAutomaton;
+}
+ \end{lstlisting}
+ 
+ A função toma como entrada um objeto \textbf{CelularAutomaton} chamado automaton e retorna um novo objeto \textbf{CelularAutomaton} chamado \textit{nextGenAutomaton}.
+
+A função inicia criando uma matriz chamada nextGen que tem o mesmo tamanho da matriz reticulated dentro do objeto automaton de entrada. Ela então usa duas estruturas de loop for aninhadas para iterar sobre cada célula na matriz reticulated.
+
+Para cada célula, a função usa outra função, a \textbf{countLiveNeighbors} para contar quantas células vivas existem nas células vizinhas. Isso é armazenado na variável \textit{liveNeighborsCount}.
+
+A função então usa uma estrutura de condição para verificar se a célula atual é viva ou morta. Se a célula atual é viva, então a função verifica se o número de células vivas vizinhas é menor do que 2 ou maior do que 3. Se isso for verdade, a célula na próxima geração será morta; caso contrário, ela será viva. Se a célula atual é morta, a função verifica se o número de células vivas vizinhas é igual a 3. Se isso for verdade, a célula na próxima geração será viva; caso contrário, ela será morta.
+
+Depois de iterar sobre todas as células, a função cria um novo objeto \textbf{CelularAutomaton} chamado \textit{nextGenAutomaton} e atribui à sua matriz \textit{reticulated} os valores da matriz \textit{nextGen}. Finalmente, a função retorna \textit{2} como o resultado.
+
+\clearpage
+ 
+ \subsection{Implementação do autômato}
+\noindent Seguido pelo tp.c, o arquivo main:
+
+\begin{lstlisting}[caption={Função main.},label={lst:cod4},language=C]
+#include <stdio.h>
+#include "automato.h"
+
+int main(int argc, char **argv) 
+{
+  CelularAutomaton automaton;
+
+  readReticulated(&automaton);
+  CelularAutomaton nextGenAutomaton = evolveReticulated(automaton);
+
+  printReticulated(nextGenAutomaton);
+
+  deallocateReticulated(&automaton);
+  deallocateReticulated(&nextGenAutomaton);
+  
+  return 0;
+}
+ \end{lstlisting}
+ \hfill\break
+ 
+ No código main é criado o TAD "automaton", ademais é chamado as funções de leitura e evolução das células, posteriormente se tem a saída dos dados dos resultados e a desalocação das memórias dinâmicas usadas no programa.
+ 
+ \clearpage
+\section{Experimentos}
+\DESCRICAO{}
+
+Para os experimentos foram usados dois arquivos de entrada seguindo o modelo já explicado anteriormente. Os testes foram realizados no hardware especificado anteriormente.
+ 
+Além do mais, para saber o tempo de execução e o uso de memória foi utilizado o \textit{valgrind} e o \textit{time} do linux. Cada entrada foi executada três vezes.
+
+\subsection{Entrada 1}
+\noindent O primeiro teste recebeu como entrada os seguintes dados: 
+
+\begin{lstlisting}[caption={Entrada 1.},label={lst:cod5},language=C]
+15
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 1 1 0 0 0 1 0 1 0 1 1 1 0 0
+0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 1 1 0 0 0 1 0 0 0 0
+0 0 0 0 1 0 0 0 0 0 0 0 0 0 0
+0 0 1 0 1 0 0 0 0 0 0 1 0 0 0
+0 0 0 0 0 0 1 0 0 0 0 1 0 0 0
+0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+0 0 1 0 0 0 0 0 0 0 1 1 0 0 0
+0 0 0 1 0 1 0 1 1 0 1 0 1 0 0
+0 0 0 0 0 1 1 0 1 0 1 0 1 1 0
+0 0 0 0 0 1 0 1 1 0 0 1 1 0 0
+0 1 0 0 0 1 0 1 0 0 0 0 1 0 0
+0 0 0 0 0 0 0 1 1 0 0 0 0 1 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ \end{lstlisting}
+ 
+ \hfill\break
+ 
+\noindent A saída obtida foi: 
+ \begin{lstlisting}[caption={Saída 1.},label={lst:cod6},language=C]
+0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+0 1 1 0 0 0 0 0 0 0 0 1 0 0 0
+0 1 1 0 0 1 1 1 0 1 1 0 0 0 0
+0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+0 0 0 1 1 0 0 0 0 0 0 0 0 0 0
+0 0 0 1 0 1 0 0 0 0 0 0 0 0 0
+0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 1 1 0 0 0
+0 0 1 1 1 0 0 0 0 1 1 1 0 0 0
+0 0 0 0 1 1 0 1 1 0 1 0 1 1 0
+0 0 0 0 0 1 0 0 0 0 1 0 0 1 0
+0 0 0 0 1 1 0 0 1 1 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 1 1 1 0
+0 0 0 0 0 0 1 1 1 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ \end{lstlisting}
+ 
+ \hfill\break
+ 
+\begin{itemize}
+\item Teste 1: Tempo de execução: 0.002s; Consumo de memória: 7,160 bytes;
+\item Teste 2: Tempo de execução: 0.003s; Consumo de memória: 7,160 bytes;
+\item Teste 3: Tempo de execução: 0.003s; Consumo de memória: 7,160 bytes;
+\end{itemize}
+\clearpage
+
+\subsection{Entrada 2}
+\noindent O segundo teste recebeu como entrada os seguintes dados: 
+
+\begin{lstlisting}[caption={Entrada 2.},label={lst:cod7},language=C]
+20
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0
+0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0
+0 0 1 0 0 0 0 0 1 1 0 0 0 0 0 1 0 1 0 0
+0 0 0 0 1 1 0 0 0 1 0 0 0 0 1 1 0 0 0 0
+0 0 1 1 1 1 0 0 0 0 0 1 1 0 0 0 0 1 0 0
+0 0 0 1 0 1 0 0 1 0 0 0 0 0 0 0 0 0 1 0
+0 0 0 0 0 1 0 0 0 1 1 1 0 1 0 0 0 0 0 0
+0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0
+0 1 1 0 0 1 0 0 1 0 0 0 1 0 1 0 0 0 0 0
+0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 1 0 0 0
+0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 1 1 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 1 0 0 0 0
+0 0 1 0 0 0 0 0 0 0 1 0 0 1 0 0 1 0 0 0
+0 1 0 0 0 1 0 1 0 0 0 1 0 0 0 0 0 1 1 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ \end{lstlisting}
+ 
+ \hfill\break
+ 
+\noindent A saída obtida foi: 
+ \begin{lstlisting}[caption={Saída 2.},label={lst:cod8},language=C]
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0
+0 0 0 1 1 0 0 0 1 1 0 0 0 0 1 1 0 0 0 0
+0 0 1 0 0 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0
+0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 1 1 0 1 1 0 0 1 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 1 1 1 0 0 1 1 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 1 1 0 0 1 1 1 1 1 0 0 0 0 0 0
+0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 1 1 0 1 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 1 1 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ \end{lstlisting}
+ 
+ \hfill\break
+ 
+\begin{itemize}
+\item Teste 1: Tempo de execução: 0.003s; Consumo de memória: 8,640  bytes;
+\item Teste 2: Tempo de execução: 0.002s; Consumo de memória: 8,640 bytes;
+\item Teste 3: Tempo de execução: 0.002s; Consumo de memória: 8,640  bytes;
+\end{itemize}
+\clearpage
+
+
+
+\clearpage
+\section{Resultados}
+
+\DESCRICAO{}
+
+A seguir está um resumo dos resultados obtidos a partir de cada entrada, bem como os pontos fortes e fracos do código-fonte do trabalho.
+
+\subsection{Resumo dos experimentos}
+
+\noindent \textbf{Entrada 1:}
+\begin{table}[!htb]
+    \centering
+    \begin{tabular}{|c | c | c |}
+        \hline
+        Teste & Tempo de execução (em segundos) & Consumo de memória (em bytes) \\\hline
+        Teste1 & 0.002 & 7,160  \\\hline
+        Teste 2 & 0.003 & 7,160 \\\hline
+        Teste 3 & 0.003 & 7,160 \\\hline
+    \end{tabular}
+    \caption{\label{tab:widgets}Resumo dos testes da entrada 1.}
+\end{table}
+
+\noindent \textbf{Entrada 2:}
+\begin{table}[!htb]
+    \centering
+    \begin{tabular}{|c | c | c |}
+        \hline
+        Teste & Tempo de execução (em segundos) & Consumo de memória (em bytes) \\\hline
+        Teste1 & 0.003 & 8,640  \\\hline
+        Teste 2 & 0.002 & 8,640 \\\hline
+        Teste 3 & 0.002 & 8,640 \\\hline
+    \end{tabular}
+    \caption{\label{tab:widgets}Resumo dos testes da entrada 2.}
+\end{table}
+
+\subsection{Pontos fortes}
+\DESCRICAO{}]
+
+\begin{itemize}
+\item O código é bem estruturado e fácil de ler, com comentários úteis explicando o que cada função faz.
+\item A alocação dinâmica de memória para armazenar a matriz do autômato é uma boa prática, pois permite que o tamanho do autômato seja definido dinamicamente e evita problemas de buffer overflow.
+\item A função countLiveNeighbors() conta corretamente as células vivas vizinhas a cada célula na matriz, garantindo que a evolução do autômato seja precisa.
+\end{itemize}
+
+\subsection{Pontos fracos}
+\DESCRICAO{}
+
+\begin{itemize}
+\item Não há nenhuma verificação de erro para a função fscanf na função readReticulated() o que pode causar erro caso o arquivo esteja incompleto ou tenha formato inválido.
+\item A função evolveReticulated() cria uma cópia da matriz do autômato antes de evoluir as células. Isso pode causar problemas de desempenho se a matriz for grande e essa cópia deve ser desalocada manualmente.
+\item 
+\end{itemize}
+
+
+\clearpage
+
+
+\section{Considerações Finais}
+\DESCRICAO{}
+
+Inicialmente, nós analisamos o que foi pedido dentro do pdf do trabalho prático, buscamos compreender como funcionava o The Game of Life e como deveria ser implementado, após isso listamos as funções que seriam necessárias dentro do arquivo 'automato.h', ainda não havíamos entendido muito bem como implementar o TAD dentro do código então seguimos com o projeto. 
+
+Em seguida, partimos para o desenvolvimento das funções no arquivo 'automato.c', onde começamos pelas funções mais simples de alocação, desalocação, leitura do arquivo e de impressão da matriz com a próxima geração, essa parte consideramos mais simples, a função de evoluir a geração passamos mais tempo desenvolvendo e após vários testes conseguimos  desenvolver com auxílio de uma outra função chamada countLiveNeighbors, que basicamente checa através de várias condições e retorna através de um contador quantas células vivas são vizinhas a posição da matriz passada, assim depois de um tempo checando conseguimos êxito.
+
+Por fim, depois de um tempo pensando surgimos com a ideia de usar o TAD para armazenar o arquivo de entrada, contendo a dimensão da matriz e a própria matriz, sendo assim, gastamos um bom tempo implementando em cada função e foi mais cansativo para alocar de forma correta por ser um struct, mas enfim conseguimos e fomos para o debug, nessa fase gastamos mais tempo que as outras consertando erros de sintaxe e alocação, utilizamos o valgrind que foi muito útil para localizar os vazamentos de memória, assim que retiramos todos os bugs, finalizamos e enviamos no run.codes.
+
+Em resumo, nós seguimos os passos de compreender e resolver o problema proposto de implementar um automato celular de acordo com as regras do The Game of Live. Começando pelas funções mais simples e evoluindo para as mais complexas que englobaram os ensinamentos  passados durante as aulas e colocando todos conhecimentos já aprendidos à prova e passando pela fase de debug que foi importante para encontrar e corrigir erros, logrando êxito ao final na execução do projeto.
+
+
+\clearpage
+
+\end{document}
